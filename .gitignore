@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# IntelliJ Idea
-.idea/
-
 # Distribution / packaging
 .Python
 env/
