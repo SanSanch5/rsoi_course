@@ -5,7 +5,7 @@ import flask_restless
 from settings import *
 
 app = flask.Flask(__name__)
-app.config['DEBUG'] = MODE
+app.config['DEBUG'] = DEBUG_MODE
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
