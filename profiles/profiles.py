@@ -17,6 +17,7 @@ class Profile(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     password_hash = db.Column(db.String(64), nullable=False)
+    phone = db.Column(db.Unicode, nullable=False, unique=True)
 
     name = db.Column(db.Unicode, nullable=False)
     middle_name = db.Column(db.Unicode, nullable=True, default=None)
@@ -26,10 +27,9 @@ class Profile(db.Model):
     # группы нет у учителя, но для студентов надо делать отдельную проверку, что группа указана
     group = db.Column(db.Unicode, nullable=True, default=None)
     about = db.Column(db.Unicode, nullable=True, default=None)
-    photo = db.Column(db.LargeBinary, nullable=False)
+    photo = db.Column(db.Unicode, nullable=False)
 
     # дополнительная необязательная информация
-    phone = db.Column(db.Unicode, nullable=True, default=None)
     email = db.Column(db.Unicode, nullable=True, default=None)
 
 db.create_all()
