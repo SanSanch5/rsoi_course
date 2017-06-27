@@ -95,4 +95,4 @@ env/
 .ropeproject
 
 # IDE settings
-.idea
+*.idea

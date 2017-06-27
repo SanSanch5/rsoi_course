@@ -36,22 +36,22 @@ def register():
 
 @app.route('/register', methods=['POST'])
 def post_to_register():
+    password_hash = hash_password(flask.request.form['password'])
+    name = flask.request.form['name']
+    middle_name = flask.request.form['midname']
+    surname = flask.request.form['surname']
+    phone = flask.request.form['phone']
+
+    role = flask.request.form['role']
+    group = None if role == 'tutor' else flask.request.form['group']
+    about = flask.request.form.get('brief', None)
+    photo_file = flask.request.files['avatar']
+    photo_filename = secure_filename(photo_file.filename)
+
+    # дополнительная необязательная информация
+    email = flask.request.form.get('email', None)
+
     try:
-        password_hash = hash_password(flask.request.form['password'])
-        name = flask.request.form['name']
-        middle_name = flask.request.form['midname']
-        surname = flask.request.form['surname']
-        phone = flask.request.form['phone']
-
-        role = flask.request.form['role']
-        group = None if role == 'tutor' else flask.request.form['group']
-        about = flask.request.form.get('brief', None)
-        photo_file = flask.request.files['avatar']
-        photo_filename = secure_filename(photo_file.filename)
-
-        # дополнительная необязательная информация
-        email = flask.request.form.get('email', None)
-
         user_response = requests.post(SERVICES_URI['profiles'], json={
             'name': name,
             'surname': surname,
@@ -68,14 +68,14 @@ def post_to_register():
         return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
 
     if user_response.status_code == 201:
-        user = user_response.json()
-        flask.session.user_id = user['id']
-
-        user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user['id'])
+        user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], phone)
         if not os.path.exists(user_upload_path):
             os.makedirs(user_upload_path)
         photo_path = os.path.join(user_upload_path, photo_filename)
         photo_file.save(photo_path)
+
+        user = user_response.json()
+        flask.session.user_id = user['id']
 
         return flask.redirect(flask.session.pop('redirect_to', '/me'), code=303)
 
@@ -99,7 +99,7 @@ def post_to_sign_in():
         user_response = requests.get(SERVICES_URI['profiles'], params={
             'q': simplejson.dumps({
                 'filters': [
-                    {'name': 'login', 'op': '==', 'val': flask.request.form['login']},
+                    {'name': 'phone', 'op': '==', 'val': flask.request.form['phone']},
                     {'name': 'password_hash', 'op': '==', 'val': hash_password(flask.request.form['password'])},
                 ],
                 'single': True,
@@ -129,20 +129,29 @@ def me():
     except requests.exceptions.RequestException:
         user = None
 
-    return flask.render_template('profile/me.html', user=user)
+    profile_photo_name = os.path.join(user['phone'], user['photo'])
+    return flask.render_template('profile/me.html',
+                                 user=user,
+                                 user_photo_path=flask.url_for(
+                                     'static',
+                                     filename=os.path.join("img", profile_photo_name)
+                                 ))
 
 
 @app.route('/me', methods=['POST'])
 def patch_me():
-    user = {}
-    if 'password' in flask.request.form and flask.request.form['password']:
-        user['password_hash'] = hash_password(flask.request.form['password'])
-    if 'name' in flask.request.form:
-        user['name'] = flask.request.form['name'] or None
-    if 'phone' in flask.request.form:
-        user['phone'] = flask.request.form['phone'] or None
-    if 'email' in flask.request.form:
-        user['email'] = flask.request.form['email'] or None
+    user = dict()
+    user['password_hash'] = hash_password(flask.request.form['password'])
+    user['name'] = flask.request.form['name']
+    user['middle_name'] = flask.request.form['midname']
+    user['surname'] = flask.request.form['surname']
+    user['phone'] = flask.request.form['phone']
+
+    user['group'] = flask.request.form.get('role', None)
+    user['about'] = flask.request.form.get('brief', None)
+
+    # дополнительная необязательная информация
+    user['email'] = flask.request.form.get('email', None)
 
     try:
         user_response = requests.patch(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id), json=user)
@@ -151,7 +160,13 @@ def patch_me():
 
     if user_response.status_code == 200:
         user = user_response.json()
-        return flask.render_template('profile/me.html', user=user)
+        profile_photo_name = os.path.join(user['phone'], user['photo'])
+        return flask.render_template('profile/me.html',
+                                     user=user,
+                                     user_photo_path=flask.url_for(
+                                         'static',
+                                         filename=os.path.join("img", profile_photo_name)
+                                     ))
 
     return flask.render_template('error.html', reason=user_response.json()), 500
 

@@ -1,46 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %}Профиль - {{ super() }}{% endblock %}
+{% block title %}Профиль{% endblock %}
 
 {% block body %}
-  <h1>Профиль</h1>
-  <form method="POST">
-    {% if user is not none %}
-      <table>
-        <tbody>
-          <tr>
-            <td style="text-align:right">Пароль:</td>
-            <td>
-              <input name="password" type="password" pattern="^.{4,}$">
-            </td>
-          </tr>
-          <tr>
-            <td style="text-align:right">Имя:</td>
-            <td>
-              <input name="name" {% if user['name'] is not none %}value="{{ user['name'] }}"{% endif %}>
-            </td>
-          </tr>
-          <tr>
-            <td style="text-align:right">e-mail:</td>
-            <td>
-              <input name="email" type="email" {% if user['email'] is not none %}value="{{ user['email'] }}"{% endif %}>
-            </td>
-          </tr>
-          <tr>
-            <td style="text-align:right">Телефон:</td>
-            <td>
-              <input name="phone" type="tel" {% if user['phone'] is not none %}value="{{ user['phone'] }}"{% endif %}>
-            </td>
-          </tr>
-          <tr>
-            <td style="text-align:right">
-              <input type="submit" value="Сохранить изменения">
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    {% else %}
-      <p>Ошибка: <em>Пользователь не найден</em></p>
-    {% endif %}
-  </form>
+    <div class="general-container">
+        <div class="container top-container">
+            <form method="post" role="form" class="form-horizontal">
+                {% if user is not none %}
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row text-center">
+                                <div>
+                                    <img src="{{ user_photo_path }}" class="img-responsive center-block">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="brief" class="col-sm-2 control-label">О себе:</label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control" rows="5" name="brief" id="brief">{% if user['about'] is not none %}{{ user['about'] }}{% endif %}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row text-left">
+                                <h1>{% if user['role'] == 'tutor' %}Преподаватель{% else %}Студент{% endif %}</h1>
+                            </div>
+                            <div class="form-group required">
+                                <label for="surname" class="col-sm-2 control-label">Фамилия</label>
+                                <div class="col-sm-6">
+                                    <input name="surname" id="surname" required="true" class="form-control"
+                                    {% if user['surname'] is not none %}value="{{ user['surname'] }}"{% endif %}>
+                                </div>
+                            </div>
+                            <div class="form-group required">
+                                <label for="name" class="col-sm-2 control-label">Имя</label>
+                                <div class="col-sm-6">
+                                    <input id="name" name="name" required="true" class="form-control"
+                                    {% if user['name'] is not none %}value="{{ user['name'] }}"{% endif %}>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="midname" class="col-sm-2 control-label">Отчество</label>
+                                <div class="col-sm-6">
+                                    <input id="midname" name="midname" class="form-control"
+                                    {% if user['middle_name'] is not none %}value="{{ user['middle_name'] }}"{% endif %}>
+                                </div>
+                            </div>
+                            {% if user['group'] is not none %}
+                                <div id="student-group" class="form-group required">
+                                    <label for="group" class="col-sm-2 control-label">Группа:</label>
+                                    <div class="col-sm-6">
+                                        <input id="group" name="group" class="form-control" required="true"
+                                        value="{{ user['group'] }}">
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="form-group required">
+                                <label for="password" class="col-sm-2 control-label">Пароль</label>
+                                <div class="col-sm-6">
+                                    <input id="password" name="password" class="form-control" required="true"
+                                           type="password" pattern="^.{6,}$" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group required">
+                                <label for="phone" class="col-sm-2 control-label">Телефон</label>
+                                <div class="col-sm-6">
+                                    <input id="phone" name="phone" class="form-control" required="true" type="tel" class="form-control"
+                                           {% if user['phone'] is not none %}value="{{ user['phone'] }}"{% endif %}>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="col-sm-2 control-label">e-mail:</label>
+                                <div class="col-sm-6">
+                                    <input id="email" name="email" class="form-control" type="email" class="form-control"
+                                           {% if user['email'] is not none %}value="{{ user['email'] }}"{% endif %}>
+                                </div>
+                            </div>
+                            <div class="row text-left">
+                                <button type="submit" class="btn btn-primary btn-orange">Сохранить изменения</button>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div>Ошибка: Пользователь не найден</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
 {% endblock  %}

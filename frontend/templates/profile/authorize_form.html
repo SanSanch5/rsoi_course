@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Авторизация - {{ super() }}{% endblock %}
+{% block title %}Вход{% endblock %}
 
 {% block body %}
-    <h1>Авторизация</h1>
-    <form method="POST">
-        <table>
-            <tbody>
-                <tr>
-                    <td style="text-align:right">Логин:</td>
-                    <td>
-                        <input name="login" pattern="^[A-Za-z]([-_]?[A-Za-z0-9]+)*$">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:right">Пароль:</td>
-                    <td>
-                        <input name="password" type="password" pattern="^.{3,}$">
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td style="text-align:right">
-                        <input type="submit" value="Вход">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </form>
+    <div class="general-container">
+        <div class="container top-container">
+            <div class="row text-center">
+                <h1 class="title">Вход</h1>
+            </div>
+            <form method="post" role="form" class="form-horizontal">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-3">
+                        <div class="form-group">
+                            <label for="phone" class="col-sm-2 control-label">Телефон:</label>
+                            <div class="col-sm-6">
+                                <input id="phone" name="phone" class="form-control" required="true"
+                                       type="tel" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="col-sm-2 control-label">Пароль:</label>
+                            <div class="col-sm-6">
+                                <input id="password" name="password" class="form-control" required="true"
+                                       placeholder="не менее 6 символов"
+                                       type="password" pattern="^.{6,}$" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-orange">Войти</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock  %}
