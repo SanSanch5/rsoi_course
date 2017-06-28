@@ -25,7 +25,7 @@ class Lesson(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     closed_at = db.Column(db.DateTime, nullable=True, default=None)
 
-    tutor_lesson_unique_pair = db.UniqueConstraint('number', 'tutor_id')
+    __table_args__ = (db.UniqueConstraint('number', 'tutor_id', name='tutor_lesson_number_uc'),)
 
 
 class Task(db.Model):

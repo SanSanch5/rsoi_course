@@ -1,32 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Урок №{{ lesson['number'] }}{% endblock %}
+{% block title %}Урок {% if lesson is not none %}№{{ lesson['number'] }}{% else %}не найден{% endif %}{% endblock %}
 
 {% block body %}
     <div class="container general-container">
-        <div class="row text-center">
-            <h2 class="title">Урок №{{ lesson['number'] }}</h2>
-        </div>
-        <div class="col-sm-6">
+        {% if lesson is not none %}
             <div class="row text-center">
-                <h3 class="title">Задание</h3>
+                <h2 class="title">Урок №{{ lesson['number'] }}</h2>
+            </div>
+            <div class="col-sm-6">
+                <div class="row text-center">
+                    <h3 class="title">Задание</h3>
+                </div>
+
+                {% if user_role == 'tutor' %}
+                {% else %}
+                {% endif %}
             </div>
 
             {% if user_role == 'tutor' %}
-            {% else %}
-            {% endif %}
-        </div>
-
-        {% if user_role == 'tutor' %}
-            <div class="col-sm-6">
-                <div class="row text-center">
-                    <h3 class="title">Ответы студентов</h3>
+                <div class="col-sm-6">
+                    <div class="row text-center">
+                        <h3 class="title">Ответы студентов</h3>
+                    </div>
                 </div>
-            </div>
+            {% else %}
+                <div class="col-sm-6">
+                    <div class="row text-center">
+                        <h3 class="title">Ваше решение</h3>
+                    </div>
+                </div>
+            {% endif %}
         {% else %}
-            <div class="col-sm-6">
+            <div class="container top-container">
                 <div class="row text-center">
-                    <h3 class="title">Ваше решение</h3>
+                    <h1 class="title">Урок не найден</h1>
                 </div>
             </div>
         {% endif %}

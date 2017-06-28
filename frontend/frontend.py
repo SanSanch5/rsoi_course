@@ -158,7 +158,8 @@ def patch_me():
     user['surname'] = flask.request.form['surname']
     user['phone'] = flask.request.form['phone']
 
-    user['group'] = flask.request.form.get('role', None)
+    user['group'] = flask.request.form.get('group', None)
+    user['tutor_id'] = flask.request.form.get('tutor', None)
     user['about'] = flask.request.form.get('brief', None)
 
     # дополнительная необязательная информация
@@ -214,7 +215,7 @@ def get_lessons():
         lessons = lessons_response.json()
         lessons = lessons['objects']
     except requests.exceptions.RequestException:
-        lessons = None
+        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 500
 
     return flask.render_template('tasks/lessons.html', user_role=user_role, lessons=lessons)
 
@@ -268,9 +269,10 @@ def get_lesson(number):
             }),
         })
         assert lesson_response.status_code == 200
-        lesson = lesson_response.json()['objects'][0]
+        lesson = lesson_response.json()['objects']
+        lesson = None if len(lesson) == 0 else lesson[0]
 
-        if lesson['task_id'] is not None:
+        if lesson and lesson['task_id'] is not None:
             task_response = requests.get(SERVICES_URI['profiles'] + "/%d" % lesson['task_id'])
             assert task_response.status_code == 200
             task = task_response.json()

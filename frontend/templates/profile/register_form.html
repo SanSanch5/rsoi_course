@@ -45,8 +45,9 @@
                             <label for="tutor" class="col-sm-3 control-label">Преподаватель:</label>
                             <div class="col-sm-7">
                                 <select id="tutor" name="tutor" class="form-control">
+                                    <option></option>
                                     {% for tutor in tutors %}
-                                        <option> value="{{ tutor['id'] }}">
+                                        <option value="{{ tutor['id'] }}">
                                             {{ tutor['surname'] }} {{ tutor['name'] }} {{ tutor['middle_name'] }}
                                         </option>
                                     {% endfor %}
