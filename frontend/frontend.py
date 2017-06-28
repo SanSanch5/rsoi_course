@@ -214,10 +214,21 @@ def get_lessons():
         assert lessons_response.status_code == 200
         lessons = lessons_response.json()
         lessons = lessons['objects']
+        if user_role == 'tutor':
+            # для преподавателя это будут все уроки, где есть непроверенные ответы
+            selected_lessons = [l for l in lessons if None in [ans['mark'] for ans in l['answers']]]
+        else:
+            # для студента - все недорешенные уроки
+            selected_lessons = [l for l in lessons if l['task_id'] is not None and flask.session.user_id not in
+                                [ans['student_id'] for ans in l['answers']]]
+
     except requests.exceptions.RequestException:
         return flask.render_template('error.html', reason='Сервис заданий недоступен'), 500
 
-    return flask.render_template('tasks/lessons.html', user_role=user_role, lessons=lessons)
+    return flask.render_template('tasks/lessons.html',
+                                 user_role=user_role,
+                                 selected_lessons=selected_lessons,
+                                 lessons=lessons)
 
 
 @app.route('/lessons', methods=['POST'])
