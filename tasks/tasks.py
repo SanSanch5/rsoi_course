@@ -1,6 +1,7 @@
 import flask
 import flask_sqlalchemy
 import flask_restless
+from flask_migrate import Migrate
 
 from settings import PORT, DEBUG_MODE, DB_URI
 
@@ -9,18 +10,22 @@ app.config['DEBUG'] = DEBUG_MODE
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 db = flask_sqlalchemy.SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Lesson(db.Model):
     __tablename__ = 'lesson'
 
     id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.Integer, nullable=False)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
     tutor_id = db.Column(db.Integer, nullable=False)
     answers = db.relationship('LessonAnswer', cascade='all, delete-orphan')
 
     created_at = db.Column(db.DateTime, nullable=False)
     closed_at = db.Column(db.DateTime, nullable=True, default=None)
+
+    tutor_lesson_unique_pair = db.UniqueConstraint('number', 'tutor_id')
 
 
 class Task(db.Model):

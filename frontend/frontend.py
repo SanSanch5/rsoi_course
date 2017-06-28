@@ -2,13 +2,14 @@ import requests
 import simplejson
 from urllib.parse import unquote as urldecode
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 import os
 import flask
 
 from session_interface import SessionInterface
 from settings import DEBUG_MODE, PORT, SERVICES_URI, UPLOAD_FOLDER
-from tools import hash_password
+from tools import hash_password, render_datetime
 
 
 app = flask.Flask(__name__)
@@ -20,7 +21,7 @@ app.session_interface = SessionInterface()
 
 @app.route('/', methods=['GET'])
 def index():
-    return flask.redirect('/me')
+    return flask.redirect('/lessons')
 
 
 @app.route('/register', methods=['GET'])
@@ -31,7 +32,13 @@ def register():
     if flask.session.user_id is not None:
         return flask.redirect('/me')
 
-    return flask.render_template('profile/register_form.html')
+    # get all tutors
+    try:
+        tutors = get_tutors()
+    except requests.exceptions.RequestException:
+        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
+
+    return flask.render_template('profile/register_form.html', tutors=tutors)
 
 
 @app.route('/register', methods=['POST'])
@@ -44,6 +51,8 @@ def post_to_register():
 
     role = flask.request.form['role']
     group = None if role == 'tutor' else flask.request.form['group']
+    tutor_id = None if role == 'tutor' else flask.request.form.get('tutor', None)
+
     about = flask.request.form.get('brief', None)
     photo_file = flask.request.files['avatar']
     photo_filename = secure_filename(photo_file.filename)
@@ -61,6 +70,7 @@ def post_to_register():
             'email': email,
             'role': role,
             'group': group,
+            'tutor_id': tutor_id,
             'about': about,
             'photo': photo_filename,
         })
@@ -124,6 +134,7 @@ def me():
 
     try:
         user_response = requests.get(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id))
+        tutors = get_tutors()
         assert user_response.status_code == 200
         user = user_response.json()
     except requests.exceptions.RequestException:
@@ -131,7 +142,7 @@ def me():
 
     profile_photo_name = os.path.join(user['phone'], user['photo'])
     return flask.render_template('profile/me.html',
-                                 user=user,
+                                 user=user, tutors=tutors,
                                  user_photo_path=flask.url_for(
                                      'static',
                                      filename=os.path.join("img", profile_photo_name)
@@ -169,6 +180,121 @@ def patch_me():
                                      ))
 
     return flask.render_template('error.html', reason=user_response.json()), 500
+
+
+@app.route('/lessons', methods=['GET'])
+def get_lessons():
+    if flask.session.user_id is None:
+        flask.session['redirect_to'] = '/lessons'
+        return flask.redirect('/sign_in')
+
+    user_role = None
+    tutor_id = None
+    if flask.session.user_id is not None:
+        try:
+            user_response = requests.get(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id))
+            if user_response.status_code != 200:
+                return flask.render_template('error.html', reason=user_response.json()), 500
+
+            user = user_response.json()
+            user_role = user['role']
+            tutor_id = user['tutor_id'] if user_role == 'student' else user['id']
+        except requests.exceptions.RequestException:
+            pass
+
+    try:
+        lessons_response = requests.get(SERVICES_URI['lessons'], params={
+            'q': simplejson.dumps({
+                'filters': [
+                    {'name': 'tutor_id', 'op': '==', 'val': tutor_id},
+                ],
+            }),
+        })
+        assert lessons_response.status_code == 200
+        lessons = lessons_response.json()
+        lessons = lessons['objects']
+    except requests.exceptions.RequestException:
+        lessons = None
+
+    return flask.render_template('tasks/lessons.html', user_role=user_role, lessons=lessons)
+
+
+@app.route('/lessons', methods=['POST'])
+def create_lesson():
+    lesson = dict()
+    lesson['number'] = flask.request.form['new_lesson']
+    lesson['tutor_id'] = flask.session.user_id
+    lesson['created_at'] = render_datetime(datetime.now())
+
+    try:
+        lesson_response = requests.post(SERVICES_URI['lessons'], json=lesson)
+    except requests.exceptions.RequestException:
+        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 500
+
+    if lesson_response.status_code == 201:
+        return flask.redirect("/lessons/%s" % lesson['number'], code=303)
+
+    return flask.render_template('error.html', reason=lesson_response.json()), 500
+
+
+@app.route('/lessons/<number>', methods=['GET'])
+def get_lesson(number):
+    if flask.session.user_id is None:
+        flask.session['redirect_to'] = "/lessons/%d" % number
+        return flask.redirect('/sign_in')
+
+    user_role = None
+    tutor_id = None
+    task = None
+    if flask.session.user_id is not None:
+        try:
+            user_response = requests.get(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id))
+            if user_response.status_code != 200:
+                return flask.render_template('error.html', reason=user_response.json()), 500
+
+            user = user_response.json()
+            user_role = user['role']
+            tutor_id = user['tutor_id'] if user_role == 'student' else user['id']
+        except requests.exceptions.RequestException:
+            pass
+
+    try:
+        lesson_response = requests.get(SERVICES_URI['lessons'], params={
+            'q': simplejson.dumps({
+                'filters': [
+                    {'name': 'tutor_id', 'op': '==', 'val': tutor_id},
+                    {'name': 'number', 'op': '==', 'val': number},
+                ],
+            }),
+        })
+        assert lesson_response.status_code == 200
+        lesson = lesson_response.json()['objects'][0]
+
+        if lesson['task_id'] is not None:
+            task_response = requests.get(SERVICES_URI['profiles'] + "/%d" % lesson['task_id'])
+            assert task_response.status_code == 200
+            task = task_response.json()
+    except requests.exceptions.RequestException:
+        lesson = None
+
+    return flask.render_template('tasks/lesson.html',
+                                 user_role=user_role,
+                                 lesson=lesson,
+                                 task=task)
+
+
+def get_tutors():
+    tutors_response = requests.get(SERVICES_URI['profiles'], params={
+        'q': simplejson.dumps({
+            'filters': [
+                {'name': 'role', 'op': '==', 'val': 'tutor'},
+            ],
+        }),
+    })
+    assert tutors_response.status_code == 200
+    tutors = tutors_response.json()
+
+    return tutors['objects']
 
 if __name__ == '__main__':
     app.run(port=PORT)

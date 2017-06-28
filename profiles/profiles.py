@@ -26,6 +26,9 @@ class Profile(db.Model):
     role = db.Column(db.Unicode, nullable=False)
     # группы нет у учителя, но для студентов надо делать отдельную проверку, что группа указана
     group = db.Column(db.Unicode, nullable=True, default=None)
+    # у студента может (должен) быть указан преподаватель
+    tutor_id = db.Column(db.Integer, db.ForeignKey('profile.id'), nullable=True, default=None)
+
     about = db.Column(db.Unicode, nullable=True, default=None)
     photo = db.Column(db.Unicode, nullable=False)
 

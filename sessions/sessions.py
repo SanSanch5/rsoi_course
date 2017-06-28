@@ -49,8 +49,7 @@ restman.create_api(Session,
                        'PUT',
                        'PATCH',
                        'DELETE'
-                    ],
-)
+                    ],)
 
 
 if __name__ == '__main__':
