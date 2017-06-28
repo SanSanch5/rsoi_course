@@ -22,6 +22,11 @@ html, body{
     padding-top: 10%;
 }
 
+.footer-container{
+    padding-top: 15px;
+    margin-left: 0;
+}
+
 .general-container form{
     margin-top: 30px;
 }
