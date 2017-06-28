@@ -12,5 +12,7 @@ UPLOAD_FOLDER = os.path.join(STATIC_PATH, 'img')
 SERVICES_URI = {service: 'http://localhost:{}/api/{}'.format(port, service) for service, port in [
     ('sessions', 5001),
     ('profiles', 5002),
+    ('tasks', 5003),
+    ('lessons', 5003),
 ]}
 
