@@ -46,7 +46,7 @@ html, body{
     margin-top: -100px; /* negative value of footer height */
     height: 100px;
     clear: both;
-    background-color: #d9bce0;
+    background: url("../img/nav_back.jpg");
 }
 
 .section-top{
@@ -61,18 +61,10 @@ html, body{
     margin-bottom: 40px;
 }
 
-.navbar-top{
-    min-height: 10px;
-    height: 20px;
-    background-color: #a372e0;
-    border: none;
-    border-radius: 0;
-}
-
 .navbar-main{
-    background-color: #d9bce0;
     border: none;
     border-radius: 0;
+    background: url("../img/nav_back.jpg");
 }
 
 .form-group.required .control-label:after {
