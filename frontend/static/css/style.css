@@ -43,8 +43,8 @@ html, body{
 
 .footer{
     position: relative;
-    margin-top: -100px; /* negative value of footer height */
-    height: 100px;
+    margin-top: -60px; /* negative value of footer height */
+    height: 60px;
     clear: both;
     background: url("../img/nav_back.jpg");
 }
@@ -70,4 +70,11 @@ html, body{
 .form-group.required .control-label:after {
   content:"*";
   color:red;
+}
+
+.task {
+    padding-top: 5px;
+    padding-left: 30px;
+    white-space: pre-wrap;
+    font-size: large;
 }

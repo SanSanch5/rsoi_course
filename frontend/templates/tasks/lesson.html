@@ -14,7 +14,24 @@
                 </div>
 
                 {% if user_role == 'tutor' %}
+                    <form method="post" role="form" class="form-horizontal">
+                        <input name="lesson_id" value="{{ lesson['id'] }}" class="hidden">
+                        <div class="row">
+                            <textarea class="form-control" rows="10" name="task" id="brief">{% if task is not none %}{{ task['task'] }}{% endif %}</textarea>
+                        </div>
+                        <div class="row text-right">
+                            {% if task is not none %}
+                                <input name="task_id" value="{{ task['id'] }}" class="hidden">
+                                <button name="update_task" type="submit" class="btn btn-primary btn-orange">Обновить</button>
+                            {% else %}
+                                <button name="create_task" type="submit" class="btn btn-primary btn-orange">Сохранить</button>
+                            {% endif %}
+                        </div>
+                    </form>
                 {% else %}
+                    <div class="task">
+                        <p>{% if task is not none %}{{ task['task'] }}{% endif %}</p>
+                    </div>
                 {% endif %}
             </div>
 

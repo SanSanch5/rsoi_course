@@ -36,7 +36,7 @@ def register():
     try:
         tutors = get_tutors()
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 503
 
     return flask.render_template('profile/register_form.html', tutors=tutors)
 
@@ -75,7 +75,7 @@ def post_to_register():
             'photo': photo_filename,
         })
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 503
 
     if user_response.status_code == 201:
         user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], phone)
@@ -116,7 +116,7 @@ def post_to_sign_in():
             }),
         })
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 503
 
     if user_response.status_code == 200:
         user = user_response.json()
@@ -168,7 +168,7 @@ def patch_me():
     try:
         user_response = requests.patch(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id), json=user)
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис пользователей недоступен'), 503
 
     if user_response.status_code == 200:
         user = user_response.json()
@@ -223,7 +223,7 @@ def get_lessons():
                                 [ans['student_id'] for ans in l['answers']]]
 
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 503
 
     return flask.render_template('tasks/lessons.html',
                                  user_role=user_role,
@@ -241,7 +241,7 @@ def create_lesson():
     try:
         lesson_response = requests.post(SERVICES_URI['lessons'], json=lesson)
     except requests.exceptions.RequestException:
-        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 500
+        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 503
 
     if lesson_response.status_code == 201:
         return flask.redirect("/lessons/%s" % lesson['number'], code=303)
@@ -252,7 +252,7 @@ def create_lesson():
 @app.route('/lessons/<number>', methods=['GET'])
 def get_lesson(number):
     if flask.session.user_id is None:
-        flask.session['redirect_to'] = "/lessons/%d" % number
+        flask.session['redirect_to'] = "/lessons/%s" % number
         return flask.redirect('/sign_in')
 
     user_role = None
@@ -284,7 +284,7 @@ def get_lesson(number):
         lesson = None if len(lesson) == 0 else lesson[0]
 
         if lesson and lesson['task_id'] is not None:
-            task_response = requests.get(SERVICES_URI['profiles'] + "/%d" % lesson['task_id'])
+            task_response = requests.get(SERVICES_URI['tasks'] + "/%d" % lesson['task_id'])
             assert task_response.status_code == 200
             task = task_response.json()
     except requests.exceptions.RequestException:
@@ -294,6 +294,47 @@ def get_lesson(number):
                                  user_role=user_role,
                                  lesson=lesson,
                                  task=task)
+
+
+@app.route('/lessons/<number>', methods=['POST'])
+def update_lesson(number):
+    try:
+        print(flask.request.form)
+        if 'create_task' in flask.request.form:
+            task = dict()
+            task['task'] = flask.request.form['task']
+            task['created_at'] = render_datetime(datetime.now())
+            task['last_updated_at'] = render_datetime(datetime.now())
+
+            task_response = requests.post(SERVICES_URI['tasks'], json=task)
+            if task_response.status_code == 201:
+                created_task = task_response.json()
+                requests.patch(SERVICES_URI['lessons'] + '/' + str(flask.request.form['lesson_id']),
+                               json={'task_id': created_task['id']})
+                return flask.redirect("/lessons/%s" % number)
+
+            return flask.render_template('error.html', reason=task_response.json()), 500
+
+        elif 'update_task' in flask.request.form:
+            task = dict()
+            task['task'] = flask.request.form['task']
+            task['last_updated_at'] = render_datetime(datetime.now())
+
+            task_response = requests.patch("%s/%s" % (SERVICES_URI['tasks'], flask.request.form['task_id']),
+                                           json=task)
+            if task_response.status_code == 200:
+                return flask.redirect("/lessons/%s" % number)
+
+            return flask.render_template('error.html', reason=task_response.json()), 500
+
+        elif 'update_answer' in flask.request.form:
+            pass
+        elif 'mark_answer' in flask.request.form:
+            pass
+    except requests.exceptions.RequestException:
+        return flask.render_template('error.html', reason='Сервис заданий недоступен'), 503
+
+    return flask.render_template('error.html', reason='Внутренняя ошибка. Что-то пошло не так.'), 500
 
 
 def get_tutors():
