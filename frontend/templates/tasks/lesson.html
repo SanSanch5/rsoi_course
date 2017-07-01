@@ -53,10 +53,10 @@
                                             <label for="mark" class="col-sm-3 control-label">Оценка:</label>
                                             <div class="col-sm-2">
                                                 <select id="mark" name="mark" class="form-control">
-                                                    <option value="5">5</option>
-                                                    <option value="4">4</option>
-                                                    <option value="3">3</option>
-                                                    <option value="2">2</option>
+                                                    <option value="5" {% if ans['mark'] == 5 %} selected="selected" {% endif %}>5</option>
+                                                    <option value="4" {% if ans['mark'] == 4 %} selected="selected" {% endif %}>4</option>
+                                                    <option value="3" {% if ans['mark'] == 3 %} selected="selected" {% endif %}>3</option>
+                                                    <option value="2" {% if ans['mark'] == 2 %} selected="selected" {% endif %}>2</option>
                                                 </select>
                                             </div>
                                             <div class="col-sm-6 text-left">

@@ -38,21 +38,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="lesson.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="lesson.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/tasks/lesson.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="87" column="41" lean-forward="false" selection-start-line="87" selection-start-column="41" selection-end-line="87" selection-end-column="41" />
+            <state relative-caret-position="128">
+              <caret line="55" column="96" lean-forward="false" selection-start-line="55" selection-start-column="96" selection-end-line="55" selection-end-column="96" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="me.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="me.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/profile/me.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="26">
-              <caret line="60" column="0" lean-forward="false" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
+            <state relative-caret-position="272">
+              <caret line="65" column="150" lean-forward="false" selection-start-line="65" selection-start-column="150" selection-end-line="65" selection-end-column="150" />
               <folding />
             </state>
           </provider>
@@ -98,13 +98,13 @@
         <option value="$PROJECT_DIR$/templates/error.html" />
         <option value="$PROJECT_DIR$/templates/profile/authorize_form.html" />
         <option value="$PROJECT_DIR$/templates/profile/register_form.html" />
-        <option value="$PROJECT_DIR$/templates/profile/me.html" />
         <option value="$PROJECT_DIR$/templates/footer.html" />
         <option value="$PROJECT_DIR$/templates/tasks/lessons.html" />
         <option value="$PROJECT_DIR$/templates/navbar.html" />
         <option value="$PROJECT_DIR$/static/css/style.css" />
         <option value="$PROJECT_DIR$/frontend.py" />
         <option value="$PROJECT_DIR$/templates/tasks/lesson.html" />
+        <option value="$PROJECT_DIR$/templates/profile/me.html" />
       </list>
     </option>
   </component>
@@ -854,14 +854,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/profile/me.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26">
-          <caret line="60" column="0" lean-forward="false" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/env/lib/python3.5/site-packages/flask/app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -891,8 +883,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/tasks/lesson.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="87" column="41" lean-forward="false" selection-start-line="87" selection-start-column="41" selection-end-line="87" selection-end-column="41" />
+        <state relative-caret-position="128">
+          <caret line="55" column="96" lean-forward="false" selection-start-line="55" selection-start-column="96" selection-end-line="55" selection-end-column="96" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/profile/me.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="65" column="150" lean-forward="false" selection-start-line="65" selection-start-column="150" selection-end-line="65" selection-end-column="150" />
           <folding />
         </state>
       </provider>

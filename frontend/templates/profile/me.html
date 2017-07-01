@@ -63,7 +63,7 @@
                                         <select id="tutor" name="tutor" class="form-control">
                                             <option></option>
                                             {% for tutor in tutors %}
-                                                <option value="{{ tutor['id'] }}">
+                                                <option value="{{ tutor['id'] }}" {% if tutor['id'] == user['tutor_id'] %} selected="selected" {% endif %}>
                                                     {{ tutor['surname'] }} {{ tutor['name'] }} {{ tutor['middle_name'] }}
                                                 </option>
                                             {% endfor %}
