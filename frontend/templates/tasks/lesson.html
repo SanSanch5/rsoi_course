@@ -39,6 +39,34 @@
                 <div class="col-sm-6">
                     <div class="row text-center">
                         <h3 class="title">Ответы студентов</h3>
+                        <br>
+                        <div class="list-group col-sm-12 col-sm-offset-3 text-left">
+                            {% for ans in lesson['answers'] %}
+                                <input type="checkbox" id="li-hd-{{ ans['student_id'] }}" class="hide"/>
+                                <label for="li-hd-{{ ans['student_id'] }}">{{ ans['student_surname'] }} {{ ans['student_name'] }} {{ ans['student_midname'] }}</label>
+                                <div>
+                                    <form method="post" role="form" class="form-horizontal">
+                                        <input name="lesson_id" value="{{ lesson['id'] }}" class="hidden">
+                                        <input name="student_id" value="{{ ans['student_id'] }}" class="hidden">
+                                        <div class="answer row form-group">{{ ans['answer'] }}</div>
+                                        <div class="form-group">
+                                            <label for="mark" class="col-sm-3 control-label">Оценка:</label>
+                                            <div class="col-sm-2">
+                                                <select id="mark" name="mark" class="form-control">
+                                                    <option value="5">5</option>
+                                                    <option value="4">4</option>
+                                                    <option value="3">3</option>
+                                                    <option value="2">2</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-6 text-left">
+                                                <button name="mark_answer" type="submit" class="btn btn-primary">Поставить</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             {% else %}
@@ -52,15 +80,17 @@
                             <textarea class="form-control" rows="10" name="answer">{% if answer is not none %}{{ answer['answer'] }}{% endif %}</textarea>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-6 text-left">
+                            <div class="col-sm-4">
                             {% if answer is not none %}
                                 {% if answer['mark'] is not none %}
+                                    <div class="text-left mark">
                                         Ваша оценка: {{ answer['mark'] }}
+                                    </div>
                                 {% endif %}
                             {% endif %}
                             </div>
-                            <div class="col-sm-6 text-right">
-                                <button name="update_answer" type="submit" class="btn btn-primary btn-orange">Сохранить</button>
+                            <div class="col-sm-8 text-right">
+                                <button name="update_answer" type="submit" class="btn btn-primary btn-orange">Изменить решение</button>
                             </div>
                         </div>
                     </form>

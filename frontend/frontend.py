@@ -174,7 +174,7 @@ def patch_me():
         user = user_response.json()
         profile_photo_name = os.path.join(user['phone'], user['photo'])
         return flask.render_template('profile/me.html',
-                                     user=user,
+                                     user=user, tutors=get_tutors(),
                                      user_photo_path=flask.url_for(
                                          'static',
                                          filename=os.path.join("img", profile_photo_name)
@@ -294,6 +294,12 @@ def get_lesson(number):
                 if len(student_answers) > 0:
                     assert len(student_answers) == 1
                     answer = student_answers[0]
+            else:
+                for ans in lesson['answers']:
+                    student = requests.get(SERVICES_URI['profiles'] + "/%s" % ans['student_id']).json()
+                    ans['student_name'] = student['name']
+                    ans['student_surname'] = student['surname']
+                    ans['student_midname'] = student['middle_name']
     except requests.exceptions.RequestException:
         lesson = None
 
@@ -343,6 +349,7 @@ def update_lesson(number):
             if len(student_answers_indexes) > 0:
                 assert len(student_answers_indexes) == 1
                 answer = answers[student_answers_indexes[0]]
+                answer['mark'] = None
             else:
                 answer = dict()
                 answer['student_id'] = flask.session.user_id
@@ -359,7 +366,22 @@ def update_lesson(number):
             return flask.render_template('error.html', reason=lesson_response.json()), 500
 
         elif 'mark_answer' in flask.request.form:
-            pass
+            lesson_response = requests.get("%s/%s" % (SERVICES_URI['lessons'], flask.request.form['lesson_id']))
+            answers = lesson_response.json()['answers']
+            student_id = int(flask.request.form['student_id'])
+            student_answers_indexes = [ind for ind, ans in enumerate(answers)
+                                       if ans['student_id'] == student_id]
+            assert len(student_answers_indexes) == 1
+            answer = answers[student_answers_indexes[0]]
+            answer['mark'] = flask.request.form['mark']
+            answer['last_updated_at'] = render_datetime(datetime.now())
+            lesson_response = requests.patch("%s/%s" % (SERVICES_URI['lessons'], flask.request.form['lesson_id']),
+                                             json={'answers': answers})
+            if lesson_response.status_code == 200:
+                return flask.redirect("/lessons/%s" % number)
+
+            return flask.render_template('error.html', reason=lesson_response.json()), 500
+
     except requests.exceptions.RequestException:
         return flask.render_template('error.html', reason='Сервис заданий недоступен'), 503
 

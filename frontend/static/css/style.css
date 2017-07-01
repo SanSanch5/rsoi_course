@@ -78,3 +78,41 @@ html, body{
     white-space: pre-wrap;
     font-size: large;
 }
+
+.answer {
+    white-space: pre-wrap;
+    font-size: medium;
+}
+
+.mark {
+    font-weight: bold;
+    font-size: large;
+}
+/* скрываем чекбоксы и блоки с содержанием */
+.hide {
+    display: none;
+}
+
+.hide + label ~ div{
+    display: none;
+}
+
+/* оформляем текст label */
+.hide + label {
+    border-bottom: 1px dotted green;
+    padding: 0;
+    color: #374480;
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* вид текста label при активном переключателе */
+.hide:checked + label {
+    color: #4b6680;
+    border-bottom: 0;
+}
+
+/* когда чекбокс активен показываем блоки с содержанием  */
+.hide:checked + label + div {
+    display: block;
+}
