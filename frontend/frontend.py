@@ -258,6 +258,7 @@ def get_lesson(number):
     user_role = None
     tutor_id = None
     task = None
+    answer = None
     if flask.session.user_id is not None:
         try:
             user_response = requests.get(SERVICES_URI['profiles'] + '/' + str(flask.session.user_id))
@@ -283,17 +284,24 @@ def get_lesson(number):
         lesson = lesson_response.json()['objects']
         lesson = None if len(lesson) == 0 else lesson[0]
 
-        if lesson and lesson['task_id'] is not None:
-            task_response = requests.get(SERVICES_URI['tasks'] + "/%d" % lesson['task_id'])
-            assert task_response.status_code == 200
-            task = task_response.json()
+        if lesson:
+            if lesson['task_id'] is not None:
+                task_response = requests.get(SERVICES_URI['tasks'] + "/%d" % lesson['task_id'])
+                assert task_response.status_code == 200
+                task = task_response.json()
+            if user_role == 'student':
+                student_answers = [ans for ans in lesson['answers'] if ans['student_id'] == user['id']]
+                if len(student_answers) > 0:
+                    assert len(student_answers) == 1
+                    answer = student_answers[0]
     except requests.exceptions.RequestException:
         lesson = None
 
     return flask.render_template('tasks/lesson.html',
                                  user_role=user_role,
                                  lesson=lesson,
-                                 task=task)
+                                 task=task,
+                                 answer=answer)
 
 
 @app.route('/lessons/<number>', methods=['POST'])
@@ -328,7 +336,28 @@ def update_lesson(number):
             return flask.render_template('error.html', reason=task_response.json()), 500
 
         elif 'update_answer' in flask.request.form:
-            pass
+            lesson_response = requests.get("%s/%s" % (SERVICES_URI['lessons'], flask.request.form['lesson_id']))
+            answers = lesson_response.json()['answers']
+            student_answers_indexes = [ind for ind, ans in enumerate(answers)
+                                       if ans['student_id'] == flask.session.user_id]
+            if len(student_answers_indexes) > 0:
+                assert len(student_answers_indexes) == 1
+                answer = answers[student_answers_indexes[0]]
+            else:
+                answer = dict()
+                answer['student_id'] = flask.session.user_id
+                answer['created_at'] = render_datetime(datetime.now())
+                answers.append(answer)
+
+            answer['answer'] = flask.request.form['answer']
+            answer['last_updated_at'] = render_datetime(datetime.now())
+            lesson_response = requests.patch("%s/%s" % (SERVICES_URI['lessons'], flask.request.form['lesson_id']),
+                                             json={'answers': answers})
+            if lesson_response.status_code == 200:
+                return flask.redirect("/lessons/%s" % number)
+
+            return flask.render_template('error.html', reason=lesson_response.json()), 500
+
         elif 'mark_answer' in flask.request.form:
             pass
     except requests.exceptions.RequestException:
